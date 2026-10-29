@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Смачно — система онлайн-замовлення їжі</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top">
+      <span class="brand-mark">С</span>
+      <span>Смачно<small>мікросервісна система замовлення їжі</small></span>
+    </a>
+    <div class="topbar-right">
+      <div class="swagger-links" title="Відкрити документацію Swagger UI">
+        <span>Swagger API:</span>
+        <a href="http://localhost:8001/docs" target="_blank">User</a>
+        <a href="http://localhost:8002/docs" target="_blank">Restaurant</a>
+        <a href="http://localhost:8003/docs" target="_blank">Order</a>
+        <a href="http://localhost:8004/docs" target="_blank">Payment</a>
+        <a href="http://localhost:8005/docs" target="_blank">Delivery</a>
+        <a href="http://localhost:8006/docs" target="_blank">Notification</a>
+      </div>
+      <span class="api-state" id="api-state">Перевіряємо сервіси…</span>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ВЕРХНЯ ПАНЕЛЬ ПРОФІЛЮ КЛІЄНТА (User + Payment + Notification Services) -->
+    <section class="profile-topbar panel" id="profile-panel">
+      <div class="profile-main">
+        <div class="profile-identity">
+          <div class="avatar" id="user-avatar">ОК</div>
+          <div class="profile-text">
+            <div class="profile-label-row">
+              <span class="eyebrow">ОСОБИСТИЙ КАБІНЕТ КЛІЄНТА</span>
+              <span class="user-id-badge" id="user-id-badge">ID: —</span>
+            </div>
+            <h2 id="user-name-display">Завантаження профілю…</h2>
+            <p class="profile-contacts" id="user-contacts-display">Оберіть або створіть профіль клієнта</p>
+          </div>
+        </div>
+
+        <div class="profile-stats">
+          <div class="stat-box">
+            <span class="stat-label">Активні замовлення</span>
+            <strong id="stat-active-orders">0</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Оплачено</span>
+            <strong class="stat-green" id="stat-paid-total">0 ₴</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Повернуто коштів</span>
+            <strong class="stat-refund" id="stat-refund-total">0 ₴</strong>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="quiet-btn" id="toggle-notifications-btn" type="button">
+            🔔 Сповіщення <span class="badge-count" id="notif-count">0</span>
+          </button>
+          <button class="quiet-btn" id="edit-profile-btn" type="button">✏️ Редагувати</button>
+          <button class="quiet-btn" id="switch-user-btn" type="button">👥 Змінити / Новий</button>
+        </div>
+      </div>
+
+      <!-- Випадаюча панель редагування або створення/вибору клієнта -->
+      <div id="profile-drawer" class="profile-drawer hidden">
+        <div class="drawer-columns">
+          <form id="user-form" class="profile-form">
+            <h3 id="user-form-title">Створити або оновити профіль</h3>
+            <input type="hidden" name="mode" id="user-form-mode" value="create">
+            <div class="form-row">
+              <label>Ім’я та прізвище
+                <input name="name" id="input-user-name" required placeholder="Олена Коваль">
+              </label>
+              <label>Електронна пошта (Email)
+                <input name="email" id="input-user-email" type="email" required placeholder="olena@example.com">
+              </label>
+              <label>Номер телефону
+                <input name="phone" id="input-user-phone" required placeholder="+380501234567">
+              </label>
+              <div class="form-buttons">
+                <button class="primary" type="submit" id="user-form-submit">Зберегти</button>
+                <button class="quiet" type="button" id="close-profile-drawer">Закрити</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="existing-users-box" id="existing-users-section">
+            <h3>Швидкий вибір існуючого профілю</h3>
+            <div id="users-list" class="users-chips"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Випадаюча панель сповіщень клієнта (Notification Service) -->
+      <div id="notifications-drawer" class="profile-drawer hidden">
+        <div class="drawer-header">
+          <h3>🔔 Повідомлення системи (Notification Service)</h3>
+          <button class="quiet" type="button" id="close-notif-drawer">Приховати</button>
+        </div>
+        <div id="notifications-list" class="notifications-list">
+          <p class="muted">Повідомлень поки немає.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- БАнер -->
+    <section class="hero">
+      <div>
+        <p class="eyebrow">ШВИДКА ДОСТАВКА У КИЄВІ ТА ХАРКОВІ</p>
+        <h1>Що сьогодні<br><em>замовимо?</em></h1>
+        <p class="hero-copy">Обирай улюблений ресторан української чи азійської кухні, формуй кошик та керуй замовленнями онлайн.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true"><span>🍕</span><span>🍜</span><span>🍣</span></div>
+    </section>
+
+    <!-- ОСНОВНА СІТКА: РЕСТОРАНИ + МЕНЮ ТА КОШИК -->
+    <section class="layout">
+      <div class="catalog">
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">КРОК 1 · RESTAURANT SERVICE</p>
+              <h2>Обери заклад</h2>
+            </div>
+            <div class="heading-actions">
+              <button class="quiet" id="reload" type="button">🔄 Оновити дані</button>
+            </div>
+          </div>
+          <div id="restaurants" class="restaurant-grid"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">КРОК 2 · МЕНЮ ЗАКЛАДУ</p>
+              <h2 id="menu-title">Страви ресторану</h2>
+            </div>
+            <span class="menu-sub" id="menu-subtitle"></span>
+          </div>
+          <div id="menu" class="menu-grid">
+            <p class="muted">Оберіть ресторан вище, щоб переглянути меню.</p>
+          </div>
+        </section>
+      </div>
+
+      <aside class="panel cart-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">КРОК 3 · ORDER SERVICE</p>
+            <h2>Кошик <span id="cart-count" class="count">0</span></h2>
+          </div>
+          <button class="quiet" id="clear-cart-btn" type="button">Очистити</button>
+        </div>
+        <div id="cart-items" class="cart-items">
+          <p class="muted">Додай страву з меню ресторану.</p>
+        </div>
+        <div class="cart-total">
+          <span>До сплати</span>
+          <strong id="total">0,00 ₴</strong>
+        </div>
+        <label class="address-label">Адреса доставки
+          <textarea id="address" rows="2" placeholder="Напр.: Харків, вул. Науки, 14, кв. 25"></textarea>
+        </label>
+        <button class="primary checkout" id="checkout" disabled>Оформити та оплатити замовлення</button>
+        <p class="fine-print">Координація: Order → Payment → Delivery → Notification Service.</p>
+        <div id="result" class="result hidden"></div>
+      </aside>
+    </section>
+
+    <!-- ІСТОРІЯ ТА КЕРУВАННЯ ЗАМОВЛЕННЯМИ -->
+    <section class="panel history-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">МОЇ ЗАМОВЛЕННЯ · ORDER + PAYMENT + DELIVERY SERVICES</p>
+          <h2>Історія та керування замовленнями</h2>
+        </div>
+        <button class="quiet" id="load-orders" type="button">🔄 Оновити замовлення</button>
+      </div>
+      <div id="orders" class="orders-grid">
+        <p class="muted">Завантаження замовлень…</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Навчальний проєкт з мікросервісної архітектури «Система онлайн-замовлення їжі» · FastAPI + SQLite + Docker Compose
+  </footer>
+  <div id="toast" role="status" class="toast hidden"></div>
+  <script src="app.js"></script>
+</body>
+</html>

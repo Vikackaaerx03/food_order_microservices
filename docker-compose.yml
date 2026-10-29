@@ -1,0 +1,46 @@
+services:
+  user-service:
+    build: ./user_service
+    ports: ["8001:8000"]
+    volumes: ["user_data:/data"]
+  restaurant-service:
+    build: ./restaurant_service
+    ports: ["8002:8000"]
+    volumes: ["restaurant_data:/data"]
+  order-service:
+    build: ./order_service
+    ports: ["8003:8000"]
+    environment:
+      USER_URL: http://user-service:8000
+      RESTAURANT_URL: http://restaurant-service:8000
+      PAYMENT_URL: http://payment-service:8000
+      DELIVERY_URL: http://delivery-service:8000
+      NOTIFICATION_URL: http://notification-service:8000
+    depends_on: [user-service, restaurant-service, payment-service, delivery-service, notification-service]
+    volumes: ["order_data:/data"]
+  payment-service:
+    build: ./payment_service
+    ports: ["8004:8000"]
+    volumes: ["payment_data:/data"]
+  delivery-service:
+    build: ./delivery_service
+    ports: ["8005:8000"]
+    volumes: ["delivery_data:/data"]
+  notification-service:
+    build: ./notification_service
+    ports: ["8006:8000"]
+    volumes: ["notification_data:/data"]
+  frontend:
+    image: nginx:alpine
+    ports: ["8080:80"]
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on: [user-service, restaurant-service, order-service, payment-service, delivery-service, notification-service]
+
+volumes:
+  user_data:
+  restaurant_data:
+  order_data:
+  payment_data:
+  delivery_data:
+  notification_data:
